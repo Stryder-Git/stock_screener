@@ -1,0 +1,173 @@
+TODO FOR RESUME
+
+	* host everything I have already
+	* with a link
+	
+
+
+	* Set up frontend with website on aws so that there is a link
+		doesn't need to be working yet
+
+
+
+
+
+
+
+	• create request from webapi to db_api //
+	* send configurations to db_api 
+		--> figure out how to send query strings
+
+	* create table sorting based on current price
+
+	* make it cancel the SSEs somehow when requesting a new configuration
+		--> see EventSource.close on frontend side
+	
+	* set up filtering of symbols in db
+
+	* set up with some real data
+	* host on aws
+
+
+TODO AFTER
+
+	* custom sorting
+	* fundamental data
+
+
+
+
+
+
+
+
+GOAL
+
+	Stock screener
+
+
+
+
+
+NEEDS
+
+	Data on all stocks
+		Price
+		Fundamental
+
+	Configurations to apply
+		* min Price
+		* max Price
+
+	Analyzer
+		* Filter based on configs
+
+	Display results table
+		* symbol, price, volume, ....
+		-> should update automatically
+
+=================================================================
+
+
+* Whenever configs are chosen,
+	* sent to api
+	
+	* process information and sent to analyzer
+
+	* analyzer determines the stocks to watch
+	
+	* somehow update the list of stocks that sse transfers
+
+* There should be some direct link to what stocks need to be updated
+
+
+	API needs to subscribe to price data
+	
+	somehow the clients need to be sent the data of the stocks for their filter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================
+
+TODO
+
+	Price		Fundamentals
+		\       /
+		DB     DB
+		/ \    /
+  Watcher--Analysis
+	 | 	 /      \
+   Results		Filters    = FRONTEND
+
+
+   Questions
+	* Can the dbs/analysis be one single data store?
+	* What to use for analysis?
+	* What data sources?
+
+
+====================== PLAN
+
+WATCHER
+	An object that knows which stocks to keep updates on
+		
+
+
+
+
+
+
+
+
+PROTOTYPES
+	
+	KAFKA
+		* Script that produces a new event every few seconds
+		* Some kind of way to read these events and display
+
+
+
+
+NOTES
+
+	* I need to filter configs to get symbols
+	* Price Stream needs symbols
+	* when configs change, filter and update stream
+
+		
+
+
+
+
+
