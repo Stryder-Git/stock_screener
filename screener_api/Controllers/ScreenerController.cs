@@ -31,7 +31,7 @@ public class ScreenerController : ControllerBase
 
     }
 
-     public async Task Get(string configs)
+     public async Task Get()//string configs)
      {   var conf = new ConsumerConfig
          { 
              GroupId = "test-consumer-group",
@@ -44,7 +44,7 @@ public class ScreenerController : ControllerBase
              AutoOffsetReset = AutoOffsetReset.Earliest
          };
  
-         Console.WriteLine("starting with configs: " + configs);
+         //Console.WriteLine("starting with configs: " + configs);
  
          using (var c = new ConsumerBuilder<Ignore, string>(conf).Build())
             {
@@ -52,10 +52,10 @@ public class ScreenerController : ControllerBase
                 string[] symbols;
              using(var client = new HttpClient())
                 {
-                                        UriBuilder builder = new UriBuilder("http://localhost:6598/api/get");
-                    builder.Query = "name='abc'&password='cde'";
+                    //UriBuilder builder = new UriBuilder("http://localhost:6598/api/get");
+                    //builder.Query = "name='abc'&password='cde'";
 
-                    var uri = new Uri("http://localhost:8000/?c=" + configs);
+                    var uri = new Uri("http://localhost:8000/"); //?c=" + configs);
                     var strSyms = client.GetAsync(uri).Result.Content.ReadAsStringAsync().Result;
                     Console.WriteLine(strSyms);
                     symbols= JsonConvert.DeserializeObject<Symbols>(strSyms).symbols;

@@ -114,12 +114,10 @@ class StockScreener extends React.Component {
 
     update_results(data) {
         console.log("updating stocklist: ", data)
-        let state = {};
+        let state = {... this.state};
 
+        //let results =
         // data[0] = symbol, data[1:] = close, volume
-
-        let results = 
-
         state.results[data[0]] = data.slice(1);
 
         this.setState(state);    

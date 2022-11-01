@@ -18,7 +18,7 @@ export class Filter {
     }
 
     _set_stream(configs) {
-        let stream = new EventSource("http://localhost:5045/Screener/?"+configs);
+        let stream = new EventSource("http://localhost:5045/Screener"); //?"+configs);
 
         stream.onmessage = (e) => {
             console.log("the response is ", e.data);
@@ -57,19 +57,18 @@ export class Filter {
         //    AAPL: true, FB: true, NVDA: true
         //}
 
-        let q = ""
-        for (let field in confs) {
-            q += field + "=" + confs[field] + "&"
-        }
-
-
-
+        //let q = ""
+        //for (let field in confs) {
+        //    q += field + "=" + confs[field] + "&";
+        //}
 
 //        confs = JSON.stringify(confs);
 
-        console.log("configs: ", q);
+        //console.log("configs: ", q);
 
-        this._set_stream(q.slice(0, -1));
+        //this._set_stream(q.slice(0, -1));
+
+        this._set_stream(confs);
         
     }
 
