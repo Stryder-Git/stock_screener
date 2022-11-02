@@ -6,7 +6,13 @@ from collections import namedtuple
 conf = pys.SparkConf().set("spark.jars.packages",
                            "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"
                            ).setMaster("local").setAppName("TestApp")
-os.environ["HADOOP_HOME"] = r"C:\Packages\hadoop\winutils\hadoop-3.2.2"
+
+hadoop_path = r"C:\Packages\hadoop\winutils\hadoop-3.2.2"
+if not os.path.exists(hadoop_path):
+    print("RUNNING ON EC2")
+    hadoop_path = r"C:\Users\Administrator\hadoop"
+
+os.environ["HADOOP_HOME"] = hadoop_path
 spark = pys.SparkContext(conf= conf)
 sqlc = pys.SQLContext(spark)
 mongo_url = "mongodb://localhost:27017/stock_screener_price_db."
