@@ -1,4 +1,5 @@
 REM ########## CD TO KAFKA FOLDER
+rmdir c:\tmp /S /Q
 cd c:\packages\kafka
 
 start bin\windows\zookeeper-server-start.bat config\zookeeper.properties
