@@ -25,13 +25,13 @@ start venv\Scripts\python.exe price_db.py
 
 cd ..\db_api\db_api
 
-start ..\venv\Scripts\uvicorn.exe db_api:app
+start ..\venv\Scripts\uvicorn.exe db_api:app --reload
 
 
 
 cd ..\..\screener_api
 
-start dotnet run
+start dotnet watch
 
 
 cd ..\frontend
