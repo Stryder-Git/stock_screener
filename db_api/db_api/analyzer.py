@@ -94,7 +94,7 @@ class Analyzer:
             matches = getattr(self, config)(*vals)
             self.data = self.data[matches]
 
-        return ["AAPL", "B", "A"]
+        return ["A", "B"]
         return matches.to_list()
 
 

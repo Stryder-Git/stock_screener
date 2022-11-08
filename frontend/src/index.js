@@ -125,7 +125,7 @@ class StockScreener extends React.Component {
     }
 
     close_sse() {
-        console.log("closing last SSE");
+        console.log("closing last SSE", this.sse);
         this.sse.close();
         this.state.results = {};
 

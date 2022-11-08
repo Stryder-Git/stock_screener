@@ -109,7 +109,6 @@ public class ScreenerController : ControllerBase
                  }
 
                  Response.Body.Close();
-
              }
              catch (OperationCanceledException)
              {
