@@ -95,6 +95,7 @@ class StockScreener extends React.Component {
         this.update_results = this.update_results.bind(this);
 
         this.filter = new Filter(this.update_results);
+        this.sse = undefined;
 
     }
 
@@ -123,10 +124,25 @@ class StockScreener extends React.Component {
         this.setState(state);    
     }
 
+    close_sse() {
+        console.log("closing last SSE");
+        this.sse.close();
+        this.state.results = {};
+
+        console.log("sending delete request.");
+        let req = new XMLHttpRequest();
+        req.addEventListener("loadend", (event) => { console.log("delete request completed."); });
+
+        req.open("DELETE", "http://localhost:5045/Screener");
+        req.send();
+    }
+
     calculate() { // will be called when 'Calculate' is clicked
         console.log("setting Results state, configs: ", this.configs)
+        if (this.sse !== undefined) { this.close_sse(); }
+
         if (this.check_configs(this.configs)) {
-            this.filter.filter(this.configs);
+            this.sse = this.filter.filter(this.configs);
         }
     }
 

@@ -22,17 +22,30 @@ namespace ScreeenerApi.Controllers
 public class ScreenerController : ControllerBase
 {
     private ILogger<ScreenerController> _logger { get; set; }
-    // public KafkaConsumer consumer { get; set; }
+    private bool sse_connected { get; set; }
+   
 
     public ScreenerController(ILogger<ScreenerController> logger)
     {
         Console.WriteLine("Creating ScreenerController");
         _logger = logger;
+        sse_connected = false;  
 
     }
 
+        [HttpDelete]
+    public async Task Delete()
+        {
+            Console.WriteLine("Delete called: " + sse_connected);
+            sse_connected = false;    
+        
+        }
+
+        [HttpGet]
      public async Task Get()//string configs)
-     {   var conf = new ConsumerConfig
+     {   sse_connected = true;
+            
+            var conf = new ConsumerConfig
          { 
              GroupId = "test-consumer-group",
              BootstrapServers = "localhost:9092",
@@ -74,7 +87,7 @@ public class ScreenerController : ControllerBase
  
              try
              {
-                 while (true)
+                 while (sse_connected)
                  {   Console.WriteLine("trying");
                      try
                      {
@@ -94,12 +107,17 @@ public class ScreenerController : ControllerBase
                          Console.WriteLine(msg);
                      }
                  }
+
+                 Response.Body.Close();
+
              }
              catch (OperationCanceledException)
              {
                   //Ensure the consumer leaves the group cleanly and final offsets are committed.
                  c.Close();
+                 Response.Body.Close();
              }
+
          }
  }
 

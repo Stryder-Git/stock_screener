@@ -24,6 +24,8 @@ export class Filter {
             console.log("the response is ", e.data);
             this.callback(this._parse_data(e.data));
         };
+
+        return stream;
     }
 
     _get() {
@@ -68,7 +70,7 @@ export class Filter {
 
         //this._set_stream(q.slice(0, -1));
 
-        this._set_stream(confs);
+        return this._set_stream(confs);
         
     }
 
