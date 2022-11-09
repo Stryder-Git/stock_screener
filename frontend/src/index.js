@@ -133,7 +133,7 @@ class StockScreener extends React.Component {
         let req = new XMLHttpRequest();
         req.addEventListener("loadend", (event) => { console.log("delete request completed."); });
 
-        req.open("DELETE", "http://localhost:5045/Screener");
+        req.open("DELETE", "http://localhost:5045/Screener?i="+this.filter.sseid);
         req.send();
     }
 

@@ -5,15 +5,16 @@ export class Filter {
     constructor(callback) {
         this.confs = {};
         this.callback = callback;
-        
+        this.sseid = undefined;
     }
 
     _parse_data(data) {
         console.log("parsing data");
-        data = data.split(":!:")
-        let symbol = data[0];
+        data = data.split(":!:");
+        this.sseid = data[0];
 
-        data = data[data.length - 1].slice(2, -2).split(",").slice(-2);
+        let symbol = data[1];
+        data = data[data.length - 1].slice(3, -2).split(",").slice(-2);
         return [symbol, data[0], data[1]];
     }
 

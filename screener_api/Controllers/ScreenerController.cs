@@ -7,6 +7,7 @@ using System.Text;
 using Confluent.Kafka;
 using Microsoft.AspNetCore.Cors;
 using Newtonsoft.Json;
+using Java.Util;
 
 public class Symbols
 {
@@ -14,38 +15,50 @@ public class Symbols
 }
 
 
-namespace ScreeenerApi.Controllers
+namespace ScreenerApi.Controllers
 {
 
 [ApiController]
 [Route("[controller]")]
 public class ScreenerController : ControllerBase
 {
-    private ILogger<ScreenerController> _logger { get; set; }
-    private bool sse_connected { get; set; }
+    static System.Collections.Generic.Dictionary<int, ScreenerController> Screeners = new System.Collections.Generic.Dictionary<int, ScreenerController>();
+    static int id = 0;
+    int sseid;
+
+    ILogger<ScreenerController> _logger;
+    bool sse_connected = false;
    
 
     public ScreenerController(ILogger<ScreenerController> logger)
     {
         Console.WriteLine("Creating ScreenerController");
         _logger = logger;
-        sse_connected = false;  
-
     }
 
         [HttpDelete]
-    public async Task Delete()
+    public async Task Delete(int i)
         {
-            Console.WriteLine("Delete called: " + sse_connected);
-            sse_connected = false;    
-        
+            ScreenerController controller = Screeners[i];
+            Console.WriteLine(i + " Delete called: " + controller.sse_connected);
+            controller.sse_connected = false;
+            
         }
 
         [HttpGet]
-     public async Task Get()//string configs)
-     {   sse_connected = true;
-            
-            var conf = new ConsumerConfig
+     IConsumer<Ignore, string> GetConsumer()
+        {
+             HttpClient client = new HttpClient();
+             //UriBuilder builder = new UriBuilder("http://localhost:6598/api/get");
+             //builder.Query = "name='abc'&password='cde'";
+
+             var uri = new Uri("http://localhost:8000/"); //?c=" + configs);
+             var strSyms = client.GetAsync(uri).Result.Content.ReadAsStringAsync().Result;
+             Console.WriteLine(strSyms);
+             string[] symbols = JsonConvert.DeserializeObject<Symbols>(strSyms).symbols;
+
+             
+         var conf = new ConsumerConfig
          { 
              GroupId = "test-consumer-group",
              BootstrapServers = "localhost:9092",
@@ -54,52 +67,51 @@ public class ScreenerController : ControllerBase
              // topic/partitions of interest. By default, offsets are committed
              // automatically, so in this example, consumption will only start from the
              // earliest message in the topic 'my-topic' the first time you run the program.
-             AutoOffsetReset = AutoOffsetReset.Earliest
+             AutoOffsetReset = AutoOffsetReset.Latest
          };
+
+
+            var c = new ConsumerBuilder<Ignore, string>(conf).Build();
+            c.Subscribe(symbols);
  
-         //Console.WriteLine("starting with configs: " + configs);
- 
-         using (var c = new ConsumerBuilder<Ignore, string>(conf).Build())
-            {
+            return c;
+        }
+
+        [HttpGet]
+    void SendSse(string msg)
+        {
+            msg = $"data:{this.sseid}:!:{msg}'\n\n";
+            Console.WriteLine("sending " + msg);
+            byte[] bmsg = ASCIIEncoding.ASCII.GetBytes(msg);
+            Response.Body.WriteAsync(bmsg);
+            Response.Body.FlushAsync();
+        }
+
+        [HttpGet]
+     public async Task Get()//string configs)
+     {   sse_connected = true;
+         this.sseid = ++id;
+         Screeners[this.sseid] = this;
              
-                string[] symbols;
-             using(var client = new HttpClient())
-                {
-                    //UriBuilder builder = new UriBuilder("http://localhost:6598/api/get");
-                    //builder.Query = "name='abc'&password='cde'";
 
-                    var uri = new Uri("http://localhost:8000/"); //?c=" + configs);
-                    var strSyms = client.GetAsync(uri).Result.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine(strSyms);
-                    symbols= JsonConvert.DeserializeObject<Symbols>(strSyms).symbols;
-                    //Console.WriteLine(Result.symbols[0]);
-                }
+             IConsumer<Ignore, string> c = GetConsumer();
 
-                c.Subscribe(symbols);
- 
              CancellationTokenSource cts = new CancellationTokenSource();
              Console.CancelKeyPress += (_, e) => {
                  e.Cancel = true;  // prevent the process from terminating.
                  cts.Cancel();
-             };
- 
+                 };
+
+
              Response.Headers.Add("Content-Type", "text/event-stream");
- 
              try
              {
                  while (sse_connected)
                  {   Console.WriteLine("trying");
                      try
                      {
-                         var cr = c.Consume(cts.Token);
-                         string msg = $"data:{cr.Topic}:!:'{cr.Value}'\n\n";
-                         Console.WriteLine("sending " + msg);
-                         
-                         byte[] bmsg = ASCIIEncoding.ASCII.GetBytes(msg);
- 
-                         await Response.Body.WriteAsync(bmsg);
-                         await Response.Body.FlushAsync();
- 
+                         var cr = c.Consume(cts.Token); 
+                         SendSse($"{cr.Topic}:!:{cr.Value}");
                      }
                      catch (ConsumeException e)
                      {
@@ -107,12 +119,11 @@ public class ScreenerController : ControllerBase
                          Console.WriteLine(msg);
                      }
                  }
-
                  Response.Body.Close();
              }
              catch (OperationCanceledException)
              {
-                  //Ensure the consumer leaves the group cleanly and final offsets are committed.
+                 //Ensure the consumer leaves the group cleanly and final offsets are committed.
                  c.Close();
                  Response.Body.Close();
              }
@@ -121,8 +132,6 @@ public class ScreenerController : ControllerBase
  }
 
 }
-
-    }
 
 
 
