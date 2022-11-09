@@ -12,6 +12,6 @@ for (k in results) {
 let s = "hello";
 
 
-console.log(s);
+console.log(s.replaceAll("l", "%20"));
 
 console.log(s.slice(0,-1))
