@@ -1,3 +1,3 @@
-Stock Screener Webapp
+Stock Screener Web app
 
 -> Work in Progress
