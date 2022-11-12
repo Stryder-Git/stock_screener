@@ -4,6 +4,39 @@ import "./index.css";
 import { PriceStream, Filter } from "./backend.js";
 
 // CONFIGURATIONS SECTION
+
+function MinMax(props) {
+    return (
+        
+            <label>{props.field}:
+            <input key="{props.field}_min" type="text" placeholder="min" />
+                <input key="{props.field}_max" type="text" placeholder="max" />
+            </label>
+        
+        )
+}
+
+function CurrentPrice(props) {
+    return <div><MinMax field={props.field} /></div>;
+}
+
+function AddField(props) {
+    return <button>+</button>;
+}
+
+function PercentChange(props) {
+    return (
+        <div>
+            <MinMax field={props.field}/>
+            <input key="{props.field}_ndays" type="text" placeholder="ndays" />
+            <AddField/>
+        </div>
+        );
+}
+
+
+
+
 class ConfigField extends React.Component {
     constructor(props) {
         /*
@@ -164,7 +197,9 @@ class StockScreener extends React.Component {
         return (
             <div>
                 <form>
-                    {fields}
+                    <CurrentPrice field= "Current Price"/>
+                    <PercentChange field= "Percent Change"/>
+
                 </form>
                 <button className="Calculate" onClick={this.calculate}>
                     Calculate
