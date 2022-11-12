@@ -53,16 +53,23 @@ const TableHeader = (
     </tr>
 );
 
+
 function Results(props) {
 
     console.log(props);
-    let n_rows = Object.keys(props.results).length
+    let results = props.results;
+    let i = props.sort_index
+    let symbols = Object.keys(results).sort(
+        (a, b) => results[a][i] < results[b][i] ? -1 : (results[b][i] < results[a][i]) | 0);
+
+
+    let n_rows = symbols.length
     n_rows = Math.min(n_rows, props.max_rows || 50)
 
     let rows = Array(n_rows);
     let ix = 0;
-    for (let sym in props.results) {
-        let data = props.results[sym];
+    for (let sym of symbols) {
+        let data = results[sym];
         rows[ix++] = StockRow({ symbol: sym, close: data[0], volume: data[1] });
         if (ix === n_rows) { break; }
     }
@@ -163,7 +170,7 @@ class StockScreener extends React.Component {
                     Calculate
                 </button>
                 <hr/>
-                <Results results={this.state.results }/>
+                <Results results={this.state.results} sort_index={0}/>
             </div>
         );    
     }
