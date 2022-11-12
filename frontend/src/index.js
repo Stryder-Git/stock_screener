@@ -7,64 +7,64 @@ import { PriceStream, Filter } from "./backend.js";
 
 function MinMax(props) {
     return (
-        
             <label>{props.field}:
             <input key="{props.field}_min" type="text" placeholder="min" />
                 <input key="{props.field}_max" type="text" placeholder="max" />
             </label>
-        
         )
 }
 
 function CurrentPrice(props) {
     return <div><MinMax field={props.field} /></div>;
 }
-
-function AddField(props) {
-    return <button>+</button>;
+function AddRemoveField(props) {
+    return <button onClick={props.onclick}>{props.sign}</button>
 }
 
 function PercentChange(props) {
+    let button;
+    if (props.n > 0) {
+        button = <AddRemoveField onclick={props.remove_field} sign="-"/>
+    } else {
+        button = <AddRemoveField onclick={props.add_field} sign="+"/>
+    }
+
     return (
         <div>
             <MinMax field={props.field}/>
             <input key="{props.field}_ndays" type="text" placeholder="ndays" />
-            <AddField/>
+            {button}
         </div>
         );
 }
 
 
-
-
-class ConfigField extends React.Component {
+class Configurations extends React.Component {
     constructor(props) {
-        /*
-         * Needs:
-         *  * field (what is it getting)
-         *  * tracker (to update FrontEnd)
-         */
         super(props);
-        this.state = { value: ""};
-        this.handleChange = this.handleChange.bind(this);
-    }
-
-    handleChange(event) {
-        this.setState({ value: event.target.value });
-        this.props.tracker(this.props.field, event.target.value);
+        this.add = props.parent.add_field;
+        this.remove = props.parent.remove_field
     }
 
     render() {
-        let field = this.props.field;
-        return (
-                <label key={field}>
-                    {field}:
-                <input key={field + "inp"} type="text" onChange={this.handleChange} /><br />
-                </label>
-        )
-    }
-}
 
+        let pct_changes = Array(this.props.parent.state["Percent Change"]).fill(undefined);
+        for (let i in pct_changes) {
+            pct_changes[i] = <PercentChange field="Percent Change" n={i}
+                add_field={this.add("Percent Change")} remove_field={this.remove("Percent Change")}
+            />
+        }
+
+        return (
+            <form>
+                <CurrentPrice field="Current Price"/>
+                {pct_changes }    
+            </form>
+        );
+    }
+
+
+}
 
 // RESULTS SECTION
 function StockRow(props) {
@@ -117,6 +117,11 @@ function Results(props) {
         )
 }
 
+let FIELDS = {
+    "Percent Change": 1,
+    "Moving Average": 1,
+}
+
 // ROOT
 class StockScreener extends React.Component {
     constructor(props) {
@@ -125,7 +130,10 @@ class StockScreener extends React.Component {
             * callback (for the button)
          */
         super(props)
-        this.state = {results: {}};
+        this.state = {
+            results: {},
+            fields: FIELDS
+        };
 
         this.fields = ["min price", "max price", "min % change", "max % change", "above ma", "below ma"];
         this.configs = {};
@@ -133,11 +141,34 @@ class StockScreener extends React.Component {
         this.tracker = this.tracker.bind(this);
         this.calculate = this.calculate.bind(this);
         this.update_results = this.update_results.bind(this);
+        //this.add_field = this.add_field.bind(this);
+        //this.remove_field = this.remove_field.bind(this);
 
         this.filter = new Filter(this.update_results);
         this.sse = undefined;
 
     }
+
+    add_field(field) {
+        console.log("creating add_field: " + field);
+        return () => {
+            console.log("adding field: " + field);
+            let state = { ... this.state };
+            state.fields[field]++;
+            this.setState(state);
+        }
+    }
+
+    remove_field(field) {
+        console.log("creating remove_field: " + field);
+        return () => {
+            console.log("removing field: " + field)
+            let state = { ... this.state };
+            state.fields[field]--;
+            this.setState(state);
+        }
+    }
+
 
     tracker(field, value) {  // will track the values of each input field
         console.log("updating field ", field, " with ", value)
@@ -188,19 +219,10 @@ class StockScreener extends React.Component {
 
     render() {
         console.log("rendering Screener");
-        let fields = Array(this.fields.length);
-        
-        for (let i = 0; i < this.fields.length; i++) {
-            fields[i] = <ConfigField field={this.fields[i]} tracker={this.tracker} />;
-        }
-
+        console.log(this.state);
         return (
             <div>
-                <form>
-                    <CurrentPrice field= "Current Price"/>
-                    <PercentChange field= "Percent Change"/>
-
-                </form>
+                <Configurations parent={this}/>
                 <button className="Calculate" onClick={this.calculate}>
                     Calculate
                 </button>
